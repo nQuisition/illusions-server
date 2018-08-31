@@ -42,7 +42,7 @@ mongoose.connect(
 const guildName = "illusions";
 const guildRealm = "draenor";
 
-//TODO move to utils
+// TODO move to utils
 const toTitleCase = str =>
   str.charAt(0).toUpperCase() + str.substr(1).toLowerCase();
 
