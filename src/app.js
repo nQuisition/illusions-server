@@ -11,6 +11,12 @@ const Character = require("./db/models/characterSchema");
 
 const app = express();
 
+const port = process.env.PORT;
+if (!port) {
+  console.log("No port environmental variable specified! Exiting.. ");
+  process.exit(-1);
+}
+
 app.use(morgan("combined"));
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
@@ -168,8 +174,8 @@ app.get("/progression", (req, res) => {
     });
 });
 
-app.listen(8080);
-console.log("Server started on port 8080");
+app.listen(port);
+console.log(`Server started on port ${port}`);
 
 const interval = 5; //in minutes
 const scheduleFullyProcessGuild = () => {
