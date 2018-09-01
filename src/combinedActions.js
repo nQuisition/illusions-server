@@ -1,5 +1,6 @@
 const bnetUtils = require("./utils/bnetUtils");
 const guildActions = require("./guildActions");
+const logger = require("./utils/logger");
 
 const fullyProcessGuild = (guildName, guildRealm) => {
   const apiGuild = bnetUtils.guild(guildName, guildRealm);
@@ -7,8 +8,9 @@ const fullyProcessGuild = (guildName, guildRealm) => {
   let partitionedCharacters;
   let fetchedCharacters;
   let guildLastModified;
-  console.time("guildFull");
-  console.log("Initiating");
+  const startTime = Date.now();
+
+  logger.info("Starting full guild scan");
   return apiGuild
     .getLastmod()
     .then(lastMod => {
@@ -52,10 +54,12 @@ const fullyProcessGuild = (guildName, guildRealm) => {
         guildLastModified
       );
     })
-    .then(() => console.log("Donezo!"))
-    .catch(err => console.log("ERRRROR!!!!", err))
+    .then(() => logger.info("Guild scan complete!"))
+    .catch(err => logger.error(`Error! ${err.message || err}`))
     .then(() => {
-      console.timeEnd("guildFull");
+      logger.info(
+        `Full guild scan took ${(Date.now() - startTime) / 1000} seconds`
+      );
       //mongoose.disconnect();
     });
 };

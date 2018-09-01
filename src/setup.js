@@ -3,13 +3,15 @@ const Class = require("./db/models/classSchema");
 const Talent = require("./db/models/talentSchema");
 
 const bnetUtils = require("./utils/bnetUtils");
+const logger = require("./utils/logger");
 
 const setupBnetStaticData = () => {
   const dataUtils = bnetUtils.data();
+  logger.info("Setting up Bnet static data");
   return dataUtils
     .getRaces()
     .then(races => {
-      console.log("Inserting races");
+      logger.info("Inserting races");
       const toSave = races.map(
         race =>
           new Race({
@@ -23,13 +25,13 @@ const setupBnetStaticData = () => {
       return Race.insertMany(toSave);
     })
     .catch(err => {
-      console.log("ERROR while saving races static data!", err.message);
+      logger.error(`Error while saving races static data! ${err.message}`);
     })
     .then(() => {
       return dataUtils.getClassesAndSpecs();
     })
     .then(classes => {
-      console.log("Inserting classes and talents");
+      logger.info("Inserting classes and talents");
       const classesToSave = classes.map(cls => {
         const processedSpecs = Object.values(cls.specs);
         const { id, specs, ...clsToSave } = cls;
@@ -55,13 +57,12 @@ const setupBnetStaticData = () => {
       ]);
     })
     .catch(err => {
-      console.log(
-        "ERROR while saving classes and talents static data!",
-        err.message
+      logger.error(
+        `Error while saving classes and talents static data! ${err.message}`
       );
     })
     .then(() => {
-      console.log("DONE");
+      logger.info("Static data setup complete!");
     });
 };
 

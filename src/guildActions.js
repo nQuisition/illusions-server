@@ -2,7 +2,7 @@ const mongoose = require("mongoose");
 const bnetUtils = require("./utils/bnetUtils");
 const utils = require("./utils/utils");
 const config = require("./config");
-const fullSetup = require("./setup");
+const logger = require("./utils/logger");
 const dbUtils = require("./utils/dbUtils");
 const Character = require("./db/models/characterSchema");
 const CharacterChange = require("./db/models/characterChangeSchema");
@@ -50,7 +50,7 @@ exports.partitionMembers = (apiCharacters, dbCharacters) => {
         ) < 0
     )
     .map(char => char._id);
-  console.log(
+  logger.info(
     `Total members: ${apiCharacters.length}, stayed: ${
       partitionedCharacters.stayed.length
     }, joined: ${partitionedCharacters.joined.length}, left: ${
@@ -72,7 +72,7 @@ const getBnetCharacterInfo = apiCharacters => {
 exports.getBnetCharacterInfo = getBnetCharacterInfo;
 
 exports.getDBModifiedCharacters = (apiCharacters, dbCharacters) => {
-  console.log("Looking for modified characters");
+  logger.info("Looking for modified characters");
   const ids = dbCharacters
     .filter(ch => {
       const match = apiCharacters.find(
@@ -84,7 +84,7 @@ exports.getDBModifiedCharacters = (apiCharacters, dbCharacters) => {
       return match.lastModified !== ch.lastModified.getTime();
     })
     .map(ch => mongoose.Types.ObjectId(ch._id));
-  console.log(`There were ${ids.length} modified characters`);
+  logger.info(`There were ${ids.length} modified characters`);
   return Character.find({ _id: { $in: ids } }).exec();
 };
 
@@ -97,18 +97,17 @@ exports.computeCharacterDiffs = (apiCharacters, dbCharacters) => {
       )
     );
     const diffs = dbUtils.getCharacterDiff(oldChar, newChar);
-    console.log(oldChar.name, diffs.length);
     allDiffs.push(...diffs);
   });
-  console.log(`There were a total of ${allDiffs.length} changes`);
+  logger.info(`There were a total of ${allDiffs.length} changes`);
   return Promise.resolve(allDiffs);
 };
 
 exports.commitCharacterChanges = allDiffs => {
   return CharacterChange.insertMany(allDiffs, { ordered: false }).catch(err => {
-    console.log("Error inserting changes!", err.message);
-    console.log(err.writeErrors && err.writeErrors.length);
-    console.log("Inserted", err.result.nInserted);
+    logger.error(`Error inserting changes! ${err.message}`);
+    logger.error(`Failed: ${err.writeErrors && err.writeErrors.length}`);
+    logger.error(`Inserted: ${err.result.nInserted}`);
     return Promise.resolve({});
   });
 };
@@ -125,7 +124,7 @@ exports.updateDBCharacters = apiCharactersWithId => {
 };
 
 exports.markCharactersLeft = (leftIds, leftAtTimestamp) => {
-  console.log(`Removing ${leftIds.length} characters`);
+  logger.info(`Removing ${leftIds.length} characters`);
   const changes = leftIds.map(
     id =>
       new GuildChange({
@@ -136,9 +135,9 @@ exports.markCharactersLeft = (leftIds, leftAtTimestamp) => {
   );
   return GuildChange.insertMany(changes, { ordered: false })
     .catch(err => {
-      console.log("Error inserting guild changes!", err.message);
-      console.log(err.writeErrors && err.writeErrors.length);
-      console.log("Inserted", err.result.nInserted);
+      logger.error(`Error inserting guild changes! ${err.message}`);
+      logger.error(`Failed: ${err.writeErrors && err.writeErrors.length}`);
+      logger.error(`Inserted: ${err.result.nInserted}`);
       return Promise.resolve({});
     })
     .then(() => {
@@ -150,15 +149,10 @@ exports.markCharactersLeft = (leftIds, leftAtTimestamp) => {
 };
 
 exports.markCharactersJoined = (joinedChars, joinedAtTimestamp) => {
-  console.log(`Adding ${joinedChars.length} characters`);
-  joinedChars.forEach(char => {
-    console.log(char.name);
-  });
+  logger.info(`Adding ${joinedChars.length} characters`);
+  logger.info(joinedChars.map(char => char.name).join(", "));
   return getBnetCharacterInfo(joinedChars)
     .then(res => {
-      res.forEach(char => {
-        console.log(char.name);
-      });
       //TODO sometimes after namechange the api returns old names even though
       //the request contains the new one. This filters them out for now
       const toInsert = res
@@ -182,9 +176,9 @@ exports.markCharactersJoined = (joinedChars, joinedAtTimestamp) => {
           })
       );
       return GuildChange.insertMany(changes, { ordered: false }).catch(err => {
-        console.log("Error inserting guild changes!", err.message);
-        console.log(err.writeErrors && err.writeErrors.length);
-        console.log("Inserted", err.result.nInserted);
+        logger.error(`Error inserting guild changes! ${err.message}`);
+        logger.error(`Failed: ${err.writeErrors && err.writeErrors.length}`);
+        logger.error(`Inserted: ${err.result.nInserted}`);
         return Promise.resolve({});
       });
     });

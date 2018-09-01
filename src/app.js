@@ -2,6 +2,7 @@ const mongoose = require("mongoose");
 const config = require("./config");
 const combinedActions = require("./combinedActions");
 const bnetUtils = require("./utils/bnetUtils");
+const logger = require("./utils/logger");
 
 const express = require("express");
 const morgan = require("morgan");
@@ -13,11 +14,11 @@ const app = express();
 
 const port = process.env.PORT;
 if (!port) {
-  console.log("No port environmental variable specified! Exiting.. ");
+  logger.error("No port environmental variable specified! Exiting.. ");
   process.exit(-1);
 }
 
-app.use(morgan("combined"));
+app.use(morgan("combined", { stream: logger.stream }));
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 
@@ -39,8 +40,7 @@ mongoose.connect(
 );
 //mongoose.set("debug", true);
 
-const guildName = "illusions";
-const guildRealm = "draenor";
+const { guildName, guildRealm } = config;
 
 // TODO move to utils
 const toTitleCase = str =>
@@ -55,7 +55,7 @@ app.get("/guild", (req, res) => {
       res.status(200).json(result);
     })
     .catch(err => {
-      console.log("ERROR!", err.message);
+      logger.error(`Error! ${err.message}`);
       res.status(500).send(err.message);
     });
 });
@@ -66,7 +66,6 @@ app.get("/guild/ach", (req, res) => {
   Character.findOne({ name, realm }, "_id achievementPoints")
     .exec()
     .then(char => {
-      console.log(name, realm, char);
       return Character.count({
         achievementPoints: { $gte: char.achievementPoints }
       }).exec();
@@ -75,7 +74,7 @@ app.get("/guild/ach", (req, res) => {
       res.status(200).json(rank);
     })
     .catch(err => {
-      console.log("ERROR!", err.message);
+      logger.error(`Error! ${err.message}`);
       res.status(500).send(err.message);
     });
 });
@@ -90,7 +89,7 @@ app.get("/guild/ilvl", (req, res) => {
       res.status(200).json(result);
     })
     .catch(err => {
-      console.log("ERROR!", err.message);
+      logger.error(`Error! ${err.message}`);
       res.status(500).send(err.message);
     });
 });
@@ -120,7 +119,7 @@ app.get("/character", (req, res) => {
       });
     })
     .catch(err => {
-      console.log("ERROR!", err.message);
+      logger.error(`Error! ${err.message}`);
       res.status(500).send(err.message);
     });
 });
@@ -175,7 +174,7 @@ app.get("/progression", (req, res) => {
 });
 
 app.listen(port);
-console.log(`Server started on port ${port}`);
+logger.info(`Server started on port ${port}`);
 
 const interval = 5; //in minutes
 const scheduleFullyProcessGuild = () => {

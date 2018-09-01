@@ -55,7 +55,7 @@ const processTalents = (specs, talents) => {
             if (specIndex < 0) {
               specIndex = entries.findIndex(t => !t.spec);
               if (specIndex < 0) {
-                console.log("This is impossible!");
+                // console.log("This is impossible!");
               }
             }
             return entries[specIndex].spell.id;

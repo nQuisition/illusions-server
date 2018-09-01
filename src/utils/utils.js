@@ -1,3 +1,5 @@
+const logger = require("./logger");
+
 //not needed?
 function deepCloneJSONObject(obj) {
   if (typeof obj !== "object") {
@@ -21,6 +23,7 @@ const partitionPromisesWithDelay = (promiseConstructors, size, delay) => {
   const result = [];
   const failed = [];
   const numPartitions = Math.ceil(promiseConstructors.length / size);
+  logger.info(`Executing ${numPartitions} promise groups of size ${size}`);
   for (let i = 0; i < numPartitions; i++) {
     const arr = [];
     for (
@@ -31,14 +34,13 @@ const partitionPromisesWithDelay = (promiseConstructors, size, delay) => {
       arr.push(promiseConstructors[i * size + j]);
     }
     chain = chain.then(() => {
-      console.log(`Executing promise group ${i + 1}/${numPartitions}`);
       return Promise.all(arr.map(constructor => constructor()))
         .then(res => {
           result.push(...res);
           return promisedWait(delay);
         })
         .catch(err => {
-          console.log("Error!", err.message);
+          logger.warn(`Error executing group ${i + 1}! ${err.message}`);
           failed.push(...arr);
         });
     });
@@ -56,12 +58,12 @@ const partitionPromisesWithRetry = (promiseConstructors, size, delay) => {
         failed.forEach(promiseConstructor => {
           promise = promise
             .then(() => {
-              console.log("Retrying promise");
+              logger.debug("Retrying promise");
               return promiseConstructor();
             })
             .then(res => result.push(res))
             .catch(err => {
-              console.log("Error retrying promise!", err.message);
+              logger.error(`Error retrying promise! ${err.message}`);
               return Promise.resolve();
             });
         });
