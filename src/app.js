@@ -31,8 +31,8 @@ app.use((req, res, next) => {
   next();
 });
 
-//TODO had to put retryWrites to false to make index creation work...
-//Will not need index creating by mongoose in production though
+// TODO had to put retryWrites to false to make index creation work...
+// Will not need index creating by mongoose in production though
 mongoose.connect(
   `mongodb+srv://${config.dbUser}:${config.dbPassword}@${
     config.dbAddress
