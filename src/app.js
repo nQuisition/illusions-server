@@ -178,8 +178,9 @@ logger.info(`Server started on port ${port}`);
 
 const interval = 5; //in minutes
 const scheduleFullyProcessGuild = () => {
-  combinedActions.fullyProcessGuild(guildName, guildRealm);
-  setTimeout(scheduleFullyProcessGuild, interval * 60 * 1000);
+  combinedActions.fullyProcessGuild(guildName, guildRealm).then(() => {
+    setTimeout(scheduleFullyProcessGuild, interval * 60 * 1000);
+  });
 };
 
 scheduleFullyProcessGuild();
