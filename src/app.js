@@ -10,6 +10,8 @@ const bodyParser = require("body-parser");
 const guildRoutes = require("./routes/guild");
 const characterRoutes = require("./routes/character");
 
+const { guildName, guildRealm } = config;
+
 const app = express();
 
 const port = process.env.PORT;
