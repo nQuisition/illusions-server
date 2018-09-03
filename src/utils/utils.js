@@ -73,8 +73,12 @@ const partitionPromisesWithRetry = (promiseConstructors, size, delay) => {
   );
 };
 
+const toTitleCase = str =>
+  str.charAt(0).toUpperCase() + str.substr(1).toLowerCase();
+
 module.exports = {
   deepCloneJSONObject: obj => JSON.parse(JSON.stringify(obj)),
   partitionPromisesWithDelay,
-  partitionPromisesWithRetry
+  partitionPromisesWithRetry,
+  toTitleCase
 };
