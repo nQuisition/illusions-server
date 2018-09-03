@@ -1,6 +1,7 @@
 const config = require("../config");
 const { defaultErrorHandler } = require("./error");
 const { toTitleCase } = require("../utils/utils");
+const bnetUtils = require("../utils/bnetUtils");
 
 const Character = require("../db/models/characterSchema");
 

@@ -8,6 +8,6 @@ exports.defaultErrorHandler = (err, res) => {
     logger.warn(err.message);
     return res.status(404).send(err.message);
   }
-  logger.error(err.message);
-  return res.status(500).send(err.message);
+  logger.error(err);
+  return res.status(500).send(err.message || err);
 };
