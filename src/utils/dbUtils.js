@@ -72,7 +72,7 @@ const constructBnetCharacter = (json, wrap = true) => {
     faction: json.faction,
     ilvl: json.items.averageItemLevel,
     ilvle: json.items.averageItemLevelEquipped,
-    rank: json.rank ? json.rank : -1,
+    rank: json.rank !== undefined ? json.rank : 100,
     items: items
   };
   return wrap ? new Character(character) : character;
