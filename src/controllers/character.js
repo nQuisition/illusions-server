@@ -92,7 +92,7 @@ exports.getCharacterNamesLike = (req, res) => {
     return res.status(400).send("No name parameter specified");
   }
   const nameLike = toTitleCase(req.query.name);
-  Character.find({ name: { $regex: `${nameLike}.*` } })
+  Character.find({ name: { $regex: `${nameLike}.*` } }, "_id name")
     .then(chars => {
       console.log(chars);
     })
