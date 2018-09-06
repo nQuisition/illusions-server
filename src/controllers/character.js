@@ -86,3 +86,17 @@ exports.getCharacterProgression = (req, res) => {
       defaultErrorHandler(err, res);
     });
 };
+
+exports.getCharacterNamesLike = (req, res) => {
+  if (!req.query.name) {
+    return res.status(400).send("No name parameter specified");
+  }
+  const nameLike = toTitleCase(req.query.name);
+  Character.find({ name: { $regex: `${nameLike}.*` } })
+    .then(chars => {
+      console.log(chars);
+    })
+    .catch(err => {
+      defaultErrorHandler(err, res);
+    });
+};
