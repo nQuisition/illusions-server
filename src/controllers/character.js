@@ -94,7 +94,7 @@ exports.getCharacterNamesLike = (req, res) => {
   const nameLike = toTitleCase(req.query.name);
   Character.find({ name: { $regex: `${nameLike}.*` } }, "_id name")
     .then(chars => {
-      console.log(chars);
+      res.status(200).json(chars);
     })
     .catch(err => {
       defaultErrorHandler(err, res);
