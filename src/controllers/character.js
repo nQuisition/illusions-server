@@ -39,7 +39,7 @@ exports.getCharacterFull = (req, res) => {
 };
 
 exports.getCharacterProgression = (req, res) => {
-  const raidsOfInterest = [8638];
+  const raidsOfInterest = [9389];
   const name = toTitleCase(req.query.name);
   const realm = req.query.realm ? toTitleCase(req.query.realm) : guildRealm;
   bnetUtils
